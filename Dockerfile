@@ -60,4 +60,4 @@ COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-
 WORKDIR /src
 ADD pikube-unifi.py /src
 
-CMD ["kopf", "run", "/src/pikube-unify.py", "--verbose"]
+CMD ["/bin/sh", "-c", "kopf", "run", "/src/pikube-unify.py", "--verbose"]

@@ -61,4 +61,4 @@ COPY --from=builder /usr/bin/kopf /usr/bin/kopf
 WORKDIR /src
 ADD pikube-unifi.py /src
 
-CMD ["/bin/sh", "-c", "/usr/bin/kopf", "run", "/src/pikube-unify.py", "--verbose"]
+CMD ["kopf", "run", "/src/pikube-unifi.py", "--verbose"]

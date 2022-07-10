@@ -19,5 +19,4 @@ spec:
       serviceAccountName: hip-operator
       containers:
         - name: pikube-unifi
-          image: silvertoken/pikube-unifi:main
-          imagePullPolicy: Always
+          image: silvertoken/pikube-unifi:0.0.2

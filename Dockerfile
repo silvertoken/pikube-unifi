@@ -55,6 +55,6 @@ RUN set -eux \
 COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
 
 WORKDIR /src
-ADD pikube-unify.py /src
+ADD pikube-unifi.py /src
 
 CMD ["kopf", "run", "/src/pikube-unify.py", "--verbose"]

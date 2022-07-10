@@ -24,11 +24,14 @@ RUN set -eux \
 		python3-dev \
 		rust
 
+# add requirements.txt
+WORKDIR /src
+ADD requirements.txt /src
 
 # Pip required modules for "builder" stage
 RUN set -eux \
 	&& pip3 install --no-cache-dir --no-compile wheel \
-	&& pip3 install --no-cache-dir --no-compile -r requirements.txt \
+	&& pip3 install --no-cache-dir --no-compile -r /src/requirements.txt \
 	&& find /usr/lib/ -name '__pycache__' -print0 | xargs -0 -n1 rm -rf \
 	&& find /usr/lib/ -name '*.pyc' -print0 | xargs -0 -n1 rm -rf
 

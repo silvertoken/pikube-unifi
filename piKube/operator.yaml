@@ -1,0 +1,22 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pikube-unifi
+  namespace: hip
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      application: pikube-unifi
+  template:
+    metadata:
+      labels:
+        application: pikube-unifi
+    spec:
+      serviceAccountName: hip-operator
+      containers:
+        - name: pikube-unifi
+          image: silvertoken/pikube-unifi

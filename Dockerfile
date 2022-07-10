@@ -56,6 +56,7 @@ RUN set -eux \
 	&& find /usr/lib/ -name '*.pyc' -print0 | xargs -0 -n1 rm -rf
 
 COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
+COPY --from=builder /usr/bin/kopf /usr/bin/kopf
 
 WORKDIR /src
 ADD pikube-unifi.py /src

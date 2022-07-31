@@ -61,12 +61,18 @@ except kclient.rest.ApiException as e:
 	else:
 		raise e
 
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+    settings.peering.name = "unifi"
+    settings.peering.mandatory = True
+    
 @kopf.on.create('operators.silvertoken.github.io', 'v1', 'unifis')
 def on_unifi_create(namespace, spec, body, **kwargs):
 	logging.debug(f"Unifi create handler is called: {body}")
 
 	app = kclient.AppsV1Api()
 	core = kclient.CoreV1Api()
+
 	depList = app.list_namespaced_deployment(namespace=namespace, label_selector='app={}'.format(body.metadata.name))
 	logging.debug("Found {d} deployments named '{n}'".format(d=len(depList.items), n=body.metadata.name))
 	if len(depList.items) == 0:
@@ -95,6 +101,56 @@ def on_unifi_create(namespace, spec, body, **kwargs):
 			logging.error("Exception calling create '{}'".format(e))
 			raise kopf.PermanentError("Exception calling create '{}'".format(e))
 
+	logging.info("Checking DNS records for unifi...")
+ 
+	deploy_unifi_dns(namespace, body.metadata.name, spec)
+				
+
+def deploy_unifi_dns(namespace, name, spec):
+	custom = kclient.CustomObjectsApi()
+
+	dnsList = custom.list_namespaced_custom_object(
+		group='operators.silvertoken.github.io',
+		namespace=namespace,
+		version='v1',
+		plural='dns',
+		label_selector='app={}'.format(name))
+
+	logging.debug("Found {s} DNS records named '{n}'".format(s=len(dnsList['items']), n=name))
+	
+	if len(dnsList['items']) == 0:
+		logging.info(f"Creating a new unifi DNS record in namespace '{namespace}' with name: {name}")
+		body = {
+			"apiVersion": "operators.silvertoken.github.io/v1",
+			"kind": "DNS",
+			"metadata": {
+				"name": name,
+				"namespace": namespace,
+				"lables": {
+					"app": name,
+				}
+			},
+			"spec": {
+				"ip_address": spec.get('ip_address'),
+				"dns": spec.get('dns')
+			}
+		}
+		kopf.adopt(body)
+  
+		try:
+			response = custom.create_namespaced_custom_object(
+				group='operators.silvertoken.github.io',
+				namespace=namespace,
+				version='v1',
+				plural='dns',
+				body=body
+			)
+			logging.debug(f"Created DNS Record: {response}")
+			logging.info("Successfully cretaed DNS record")
+		except kclient.ApiException as e:
+			logging.error("Exception calling create '{}'".format(e))
+			raise kopf.PermanentError("Exception calling create '{}'".format(e))
+			
 def gen_unifi_deployment(namespace, name, spec):
     dep = kclient.V1Deployment(
 		metadata = kclient.V1ObjectMeta(namespace=namespace, name=name),

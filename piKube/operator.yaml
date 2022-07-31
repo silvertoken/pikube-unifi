@@ -19,4 +19,4 @@ spec:
       serviceAccountName: hip-operator
       containers:
         - name: pikube-unifi
-          image: silvertoken/pikube-unifi:0.0.2
+          image: silvertoken/pikube-unifi:0.0.3
